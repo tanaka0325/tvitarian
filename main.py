@@ -1,3 +1,5 @@
+import os
+import textwrap
 from collections import namedtuple
 import requests
 from bs4 import BeautifulSoup
@@ -10,9 +12,7 @@ def main():
     johnetsu = Program._make(get_johnetsu())
     professional = Program._make(get_professional())
 
-    notify(anothersky)
-    notify(johnetsu)
-    notify(professional)
+    notify_to_line(anothersky)
 
 
 def get_anothersky():
@@ -63,12 +63,30 @@ def get_professional():
     return (title, date + time, name, description)
 
 
-def notify(program):
-    print("title: {}".format(program.title))
-    print("datetime: {}".format(program.datetime))
-    print("name: {}".format(program.name))
-    print("description: {}".format(program.description))
-    print("\n")
+def notify_to_line(program):
+    token = os.environ.get('LINE_TOKEN')
+    if token is None:
+        print('no token')
+        return
+
+    url = "https://notify-api.line.me/api/notify"
+    headers = {"Authorization": "Bearer {}".format(token)}
+    message = textwrap.dedent("""
+        番組名: {title}
+        次回放送: {datetime}
+        ゲスト: {name}
+        番組説明: {description}
+    """)
+    payload = {
+        "message":
+        message.format(
+            title=program.title,
+            datetime=program.datetime,
+            name=program.name,
+            description=program.description)
+    }
+
+    r = requests.post(url, headers=headers, data=payload)
 
 
 if __name__ == '__main__':
