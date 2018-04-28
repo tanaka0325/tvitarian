@@ -17,9 +17,7 @@ def main():
 
 def get_anothersky():
     url = 'http://www.ntv.co.jp/anothersky/'
-    r = requests.get(url)
-    r.encoding = r.apparent_encoding
-    soup = BeautifulSoup(r.text, "html.parser")
+    soup = create_soup(url)
 
     block = soup.find(id="nextGuest").p.text
     title = soup.title.text
@@ -32,9 +30,7 @@ def get_anothersky():
 
 def get_johnetsu():
     url = 'https://www.mbs.jp/jounetsu/'
-    r = requests.get(url)
-    r.encoding = r.apparent_encoding
-    soup = BeautifulSoup(r.text, "html.parser")
+    soup = create_soup(url)
 
     block = soup.find(id="MainPeopleBK")
     d = block.find(id="PeopleDate")
@@ -49,9 +45,7 @@ def get_johnetsu():
 
 def get_professional():
     url = 'http://www4.nhk.or.jp/professional/'
-    r = requests.get(url)
-    r.encoding = r.apparent_encoding
-    soup = BeautifulSoup(r.text, "html.parser")
+    soup = create_soup(url)
 
     block = soup.find(id="free1")
     title = block.find(class_="title").text
@@ -62,6 +56,11 @@ def get_professional():
 
     return (title, date + time, name, description)
 
+
+def create_soup(url):
+    r = requests.get(url)
+    r.encoding = r.apparent_encoding
+    return BeautifulSoup(r.text, "html.parser")
 
 def notify_to_line(program):
     token = os.environ.get('LINE_TOKEN')
