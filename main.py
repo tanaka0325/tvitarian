@@ -62,6 +62,17 @@ def create_soup(url):
     r.encoding = r.apparent_encoding
     return BeautifulSoup(r.text, "html.parser")
 
+
+def format_message(title, datetime, name, description):
+    template = textwrap.dedent("""番組名: {title}
+        次回放送: {datetime}
+        ゲスト: {name}
+        番組説明: {description}
+    """)
+    return template.format(
+        title=title, datetime=datetime, name=name, description=description)
+
+
 def notify_to_line(program):
     token = os.environ.get('LINE_TOKEN')
     if token is None:
@@ -70,20 +81,9 @@ def notify_to_line(program):
 
     url = "https://notify-api.line.me/api/notify"
     headers = {"Authorization": "Bearer {}".format(token)}
-    message = textwrap.dedent("""
-        番組名: {title}
-        次回放送: {datetime}
-        ゲスト: {name}
-        番組説明: {description}
-    """)
-    payload = {
-        "message":
-        message.format(
-            title=program.title,
-            datetime=program.datetime,
-            name=program.name,
-            description=program.description)
-    }
+    message = format_message(program.title, program.datetime, program.name,
+                             program.description)
+    payload = {"message": message}
 
     r = requests.post(url, headers=headers, data=payload)
 
