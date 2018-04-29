@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 
 def main():
-    Program = namedtuple('Program', 'title datetime name description')
+    Program = namedtuple('Program', 'title date_time name description')
 
     anothersky = Program._make(get_anothersky())
     johnetsu = Program._make(get_johnetsu())
@@ -21,11 +21,11 @@ def get_anothersky():
 
     block = soup.find(id="nextGuest").p.text
     title = soup.title.text
-    datetime = block.splitlines()[0] + ' ' + block.splitlines()[1]
+    date_time = block.splitlines()[0] + ' ' + block.splitlines()[1]
     name = block.splitlines()[2]
     description = "".join(block.splitlines())
 
-    return (title, datetime[5:-5], name, description)
+    return (title, date_time[5:-5], name, description)
 
 
 def get_johnetsu():
@@ -63,14 +63,14 @@ def create_soup(url):
     return BeautifulSoup(r.text, "html.parser")
 
 
-def format_message(title, datetime, name, description):
+def format_message(title, date_time, name, description):
     template = textwrap.dedent("""番組名: {title}
-        次回放送: {datetime}
+        次回放送: {date_time}
         ゲスト: {name}
         番組説明: {description}
     """)
     return template.format(
-        title=title, datetime=datetime, name=name, description=description)
+        title=title, date_time=date_time, name=name, description=description)
 
 
 def notify_to_line(program):
@@ -81,7 +81,7 @@ def notify_to_line(program):
 
     url = "https://notify-api.line.me/api/notify"
     headers = {"Authorization": "Bearer {}".format(token)}
-    message = format_message(program.title, program.datetime, program.name,
+    message = format_message(program.title, program.date_time, program.name,
                              program.description)
     payload = {"message": message}
 
