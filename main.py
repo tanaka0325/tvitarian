@@ -12,7 +12,7 @@ def main():
     johnetsu = Program._make(get_johnetsu())
     professional = Program._make(get_professional())
 
-    notify_to_line(professional)
+    notify_to_line(anothersky)
 
 
 def get_anothersky():
