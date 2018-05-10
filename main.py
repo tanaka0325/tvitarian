@@ -12,7 +12,7 @@ def main():
     johnetsu = Program._make(get_johnetsu())
     professional = Program._make(get_professional())
 
-    notify_to_line(anothersky)
+    notify_to_line(professional)
 
 
 def get_anothersky():
@@ -48,7 +48,7 @@ def get_professional():
     soup = create_soup(url)
 
     block = soup.find(id="free1")
-    title = block.find(class_="title").text
+    title = soup.title.text
     date = block.find(class_="date").text[:-2]
     time = soup.find(class_="header-schedule").text.strip()[8:16]
     name = title  # TODO
