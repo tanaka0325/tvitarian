@@ -51,7 +51,7 @@ def get_professional():
     title = soup.title.text
     date = block.find(class_="date").text[:-2]
     time = soup.find(class_="header-schedule").text.strip()[8:16]
-    name = title  # TODO
+    name = block.find(class_="title").text  # TODO
     description = block.p.text
 
     return (title, date + time, name, description)
