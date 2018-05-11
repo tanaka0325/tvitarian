@@ -6,17 +6,21 @@ from collections import namedtuple
 import requests
 from bs4 import BeautifulSoup
 
+ANOTHER_SKY_ID = 1
+JOHNETSU_ID = 2
+PROFESSIONAL = 3
+
 
 def main():
-    Program = namedtuple('Program', 'title date name description')
+    Program = namedtuple('Program', 'id title date name description')
 
     anothersky = Program._make(get_anothersky())
     johnetsu = Program._make(get_johnetsu())
     professional = Program._make(get_professional())
 
-    print(anothersky.title, anothersky.date)
-    print(johnetsu.title, johnetsu.date)
-    print(professional.title, professional.date)
+    print(anothersky)
+    print(johnetsu)
+    print(professional)
 
 
 def get_anothersky():
@@ -32,7 +36,7 @@ def get_anothersky():
     name = block.splitlines()[2]
     description = "".join(block.splitlines())
 
-    return (title, date, name, description)
+    return (ANOTHER_SKY_ID, title, date, name, description)
 
 
 def get_johnetsu():
@@ -51,7 +55,7 @@ def get_johnetsu():
     name = block.find(id="profile").find(class_="name").text
     description = block.find(class_="catch").text
 
-    return (title, date, name, description)
+    return (JOHNETSU_ID, title, date, name, description)
 
 
 def get_professional():
@@ -69,7 +73,7 @@ def get_professional():
     name = block.find(class_="title").text  # TODO
     description = block.p.text
 
-    return (title, date, name, description)
+    return (PROFESSIONAL, title, date, name, description)
 
 
 def create_soup(url):
