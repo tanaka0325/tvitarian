@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 
 def main():
-    Program = namedtuple('Program', 'title date_time name description')
+    Program = namedtuple('Program', 'title date name description')
 
     anothersky = Program._make(get_anothersky())
     johnetsu = Program._make(get_johnetsu())
@@ -21,11 +21,11 @@ def get_anothersky():
 
     block = soup.find(id="nextGuest").p.text
     title = soup.title.text
-    date_time = block.splitlines()[0] + ' ' + block.splitlines()[1]
+    date = block.splitlines()[0]
     name = block.splitlines()[2]
     description = "".join(block.splitlines())
 
-    return (title, date_time[5:-5], name, description)
+    return (title, date[5:], name, description)
 
 
 def get_johnetsu():
@@ -36,11 +36,10 @@ def get_johnetsu():
     d = block.find(id="PeopleDate")
     title = soup.title.text
     date = d.text.splitlines()[1].strip()
-    time = d.script.text.splitlines()[2].strip()[-5:-1]
     name = block.find(id="profile").find(class_="name").text
     description = block.find(class_="catch").text
 
-    return (title, date + time, name, description)
+    return (title, date, name, description)
 
 
 def get_professional():
@@ -50,11 +49,10 @@ def get_professional():
     block = soup.find(id="free1")
     title = soup.title.text
     date = block.find(class_="date").text[:-2]
-    time = soup.find(class_="header-schedule").text.strip()[8:16]
     name = block.find(class_="title").text  # TODO
     description = block.p.text
 
-    return (title, date + time, name, description)
+    return (title, date, name, description)
 
 
 def create_soup(url):
@@ -63,14 +61,14 @@ def create_soup(url):
     return BeautifulSoup(r.text, "html.parser")
 
 
-def format_message(title, date_time, name, description):
+def format_message(title, date, name, description):
     template = textwrap.dedent("""番組名: {title}
-        次回放送: {date_time}
+        次回放送: {date}
         ゲスト: {name}
         番組説明: {description}
     """)
     return template.format(
-        title=title, date_time=date_time, name=name, description=description)
+        title=title, date=date, name=name, description=description)
 
 
 def notify_to_line(program):
@@ -81,7 +79,7 @@ def notify_to_line(program):
 
     url = "https://notify-api.line.me/api/notify"
     headers = {"Authorization": "Bearer {}".format(token)}
-    message = format_message(program.title, program.date_time, program.name,
+    message = format_message(program.title, program.date, program.name,
                              program.description)
     payload = {"message": message}
 
