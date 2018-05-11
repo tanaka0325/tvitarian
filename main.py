@@ -1,4 +1,6 @@
+import datetime
 import os
+import re
 import textwrap
 from collections import namedtuple
 import requests
@@ -12,7 +14,9 @@ def main():
     johnetsu = Program._make(get_johnetsu())
     professional = Program._make(get_professional())
 
-    notify_to_line(anothersky)
+    print(anothersky.title, anothersky.date)
+    print(johnetsu.title, johnetsu.date)
+    print(professional.title, professional.date)
 
 
 def get_anothersky():
@@ -21,11 +25,14 @@ def get_anothersky():
 
     block = soup.find(id="nextGuest").p.text
     title = soup.title.text
-    date = block.splitlines()[0]
+
+    date_str = block.splitlines()[0][5:].split('.')
+    date = datetime.date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
+
     name = block.splitlines()[2]
     description = "".join(block.splitlines())
 
-    return (title, date[5:], name, description)
+    return (title, date, name, description)
 
 
 def get_johnetsu():
@@ -35,7 +42,12 @@ def get_johnetsu():
     block = soup.find(id="MainPeopleBK")
     d = block.find(id="PeopleDate")
     title = soup.title.text
-    date = d.text.splitlines()[1].strip()
+
+    date_str = d.text.splitlines()[1].strip()
+    date_list = re.split('[年月日]', date_str)
+    date = datetime.date(
+        int(date_list[0]), int(date_list[1]), int(date_list[2]))
+
     name = block.find(id="profile").find(class_="name").text
     description = block.find(class_="catch").text
 
@@ -48,7 +60,12 @@ def get_professional():
 
     block = soup.find(id="free1")
     title = soup.title.text
-    date = block.find(class_="date").text[:-2]
+
+    date_str = block.find(class_="date").text[:-2]
+    date_list = re.split('[年月日]', date_str)
+    today = datetime.date.today()
+    date = datetime.date(today.year, int(date_list[0]), int(date_list[1]))
+
     name = block.find(class_="title").text  # TODO
     description = block.p.text
 
