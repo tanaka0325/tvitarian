@@ -1,6 +1,7 @@
 import datetime
 import os
 import re
+import redis
 import textwrap
 from collections import namedtuple
 import requests
@@ -18,9 +19,42 @@ def main():
     johnetsu = Program._make(get_johnetsu())
     professional = Program._make(get_professional())
 
-    print(anothersky)
-    print(johnetsu)
-    print(professional)
+    conn = connect_redis()
+    notify(anothersky, conn)
+    notify(johnetsu, conn)
+    notify(professional, conn)
+
+
+def connect_redis():
+    pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
+    return redis.StrictRedis(connection_pool=pool)
+
+
+def isUpdated(program, conn):
+    notified_date_bytes = conn.get(program.id)
+    if notified_date_bytes is None:
+        return True
+
+    l = notified_date_bytes.decode('utf-8').split('-')
+    notified_date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
+
+    if notified_date < program.date:
+        return True
+    else:
+        return False
+
+
+def update_notify_date(program, conn):
+    conn.set(program.id, program.date)
+
+
+def notify(program, conn):
+    if isUpdated(program, conn):
+        # notify_to_line(program)
+        print(program)
+        update_notify_date(program, conn)
+    else:
+        print('no update')
 
 
 def get_anothersky():
