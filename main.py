@@ -6,6 +6,7 @@ import textwrap
 from collections import namedtuple
 import requests
 from bs4 import BeautifulSoup
+from selenium.webdriver import Chrome, ChromeOptions
 
 ANOTHER_SKY_ID = 1
 JOHNETSU_ID = 2
@@ -15,9 +16,13 @@ PROFESSIONAL = 3
 def main():
     Program = namedtuple('Program', 'id title date name description')
 
+    options = ChromeOptions()
+    options.add_argument('--headless')
+    driver = Chrome(options=options)
+
     anothersky = Program._make(get_anothersky())
     johnetsu = Program._make(get_johnetsu())
-    professional = Program._make(get_professional())
+    professional = Program._make(get_professional(driver))
 
     conn = connect_redis()
     notify(anothersky, conn)
@@ -50,7 +55,7 @@ def update_notify_date(program, conn):
 
 def notify(program, conn):
     if isUpdated(program, conn):
-        # notify_to_line(program)
+        notify_to_line(program)
         print(program)
         update_notify_date(program, conn)
     else:
@@ -92,20 +97,25 @@ def get_johnetsu():
     return (JOHNETSU_ID, title, date, name, description)
 
 
-def get_professional():
+def get_professional(driver):
     url = 'http://www4.nhk.or.jp/professional/'
-    soup = create_soup(url)
+    driver.get(url)
+    html = driver.page_source.encode('utf-8')
+    soup = BeautifulSoup(html, "html.parser")
 
-    block = soup.find(id="free1")
+    block = soup.find(id="ProgramContents")
     title = soup.title.text
 
-    date_str = block.find(class_="date").text[:-2]
-    date_list = re.split('[年月日]', date_str)
-    today = datetime.date.today()
-    date = datetime.date(today.year, int(date_list[0]), int(date_list[1]))
+    date_str = block.find("time")['datetime']
+    date_list = date_str.split('-')
+    date = datetime.date(
+        int(date_list[0]), int(date_list[1]), int(date_list[2]))
 
-    name = block.find(class_="title").text  # TODO
-    description = block.p.text
+    description_block = block.find(class_="program-description")
+    description = description_block.p.get_text()
+
+    name_str = description_block.find(class_="appear").get_text()
+    name = re.search("】(.+),【", name_str).group(1)
 
     return (PROFESSIONAL, title, date, name, description)
 
