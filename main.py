@@ -30,38 +30,6 @@ def main():
     notify(professional, conn)
 
 
-def connect_redis():
-    pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
-    return redis.StrictRedis(connection_pool=pool)
-
-
-def isUpdated(program, conn):
-    notified_date_bytes = conn.get(program.id)
-    if notified_date_bytes is None:
-        return True
-
-    l = notified_date_bytes.decode('utf-8').split('-')
-    notified_date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
-
-    if notified_date < program.date:
-        return True
-    else:
-        return False
-
-
-def update_notify_date(program, conn):
-    conn.set(program.id, program.date)
-
-
-def notify(program, conn):
-    if isUpdated(program, conn):
-        notify_to_line(program)
-        print(program)
-        update_notify_date(program, conn)
-    else:
-        print('no update')
-
-
 def get_anothersky():
     url = 'http://www.ntv.co.jp/anothersky/'
     soup = create_soup(url)
@@ -124,6 +92,38 @@ def create_soup(url):
     r = requests.get(url)
     r.encoding = r.apparent_encoding
     return BeautifulSoup(r.text, "html.parser")
+
+
+def connect_redis():
+    pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
+    return redis.StrictRedis(connection_pool=pool)
+
+
+def isUpdated(program, conn):
+    notified_date_bytes = conn.get(program.id)
+    if notified_date_bytes is None:
+        return True
+
+    l = notified_date_bytes.decode('utf-8').split('-')
+    notified_date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
+
+    if notified_date < program.date:
+        return True
+    else:
+        return False
+
+
+def update_notify_date(program, conn):
+    conn.set(program.id, program.date)
+
+
+def notify(program, conn):
+    if isUpdated(program, conn):
+        notify_to_line(program)
+        print(program)
+        update_notify_date(program, conn)
+    else:
+        print('no update')
 
 
 def format_message(title, date, name, description):
