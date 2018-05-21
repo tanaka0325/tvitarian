@@ -24,9 +24,11 @@ RedisInfo = namedtuple('RedisInfo', 'host port db_no')
 
 
 def main():
-    options = ChromeOptions()
-    options.add_argument('--headless')
-    driver = Chrome(options=options)
+    caps = Selenium::WebDriver::Remote::Capabilities.chrome("chromeOptions" => {binary: "/app/.apt/usr/bin/google-chrome", args: ["--headless"]})
+    driver = Selenium::WebDriver.for :chrome, desired_capabilities: caps
+    # options = ChromeOptions()
+    # options.add_argument('--headless')
+    # driver = Chrome(options=options)
 
     anothersky = Program._make(get_anothersky())
     johnetsu = Program._make(get_johnetsu())
