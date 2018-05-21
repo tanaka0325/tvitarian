@@ -1,21 +1,29 @@
 import datetime
 import os
 import re
-import redis
 import textwrap
 from collections import namedtuple
+from urllib.parse import urlparse
+
+import redis
 import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome, ChromeOptions
 
+# constants
 ANOTHER_SKY_ID = 1
 JOHNETSU_ID = 2
 PROFESSIONAL = 3
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DBNO = 0
+
+# namedtuples
+Program = namedtuple('Program', 'id title date name description')
+RedisInfo = namedtuple('RedisInfo', 'host port db_no')
 
 
 def main():
-    Program = namedtuple('Program', 'id title date name description')
-
     options = ChromeOptions()
     options.add_argument('--headless')
     driver = Chrome(options=options)
@@ -94,8 +102,19 @@ def create_soup(url):
     return BeautifulSoup(r.text, "html.parser")
 
 
+def get_redis_info():
+    redis_url = urlparse(os.environ.get("REDIS_URL"))
+    host = redis_url.hostname or REDIS_HOST
+    port = redis_url.port or REDIS_PORT
+    db_no = REDIS_DBNO or REDIS_DBNO
+
+    return RedisInfo(host=host, port=port, db_no=db_no)
+
+
 def connect_redis():
-    pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
+    redis_info = get_redis_info()
+    pool = redis.ConnectionPool(
+        host=redis_info.host, port=redis_info.port, db=redis_info.db_no)
     return redis.StrictRedis(connection_pool=pool)
 
 
