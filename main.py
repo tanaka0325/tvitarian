@@ -24,8 +24,11 @@ RedisInfo = namedtuple('RedisInfo', 'host port db_no')
 
 
 def main():
-    caps = Selenium::WebDriver::Remote::Capabilities.chrome("chromeOptions" => {binary: "/app/.apt/usr/bin/google-chrome", args: ["--headless"]})
-    driver = Selenium::WebDriver.for :chrome, desired_capabilities: caps
+    options = ChromeOptions()
+    options.binary_location = '/app/.apt/usr/bin/google-chrome'
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    driver = Chrome(options=options)
     # options = ChromeOptions()
     # options.add_argument('--headless')
     # driver = Chrome(options=options)
