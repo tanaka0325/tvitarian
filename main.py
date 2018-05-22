@@ -29,10 +29,6 @@ def main():
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     driver = Chrome(options=options)
-    # options = ChromeOptions()
-    # options.add_argument('--headless')
-    # driver = Chrome(options=options)
-
     anothersky = Program._make(get_anothersky())
     johnetsu = Program._make(get_johnetsu())
     professional = Program._make(get_professional(driver))
