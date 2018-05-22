@@ -2,13 +2,12 @@ import datetime
 import os
 import re
 import textwrap
+import time
 from collections import namedtuple
 import redis
 import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome, ChromeOptions
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions
 
 # constants
 ANOTHER_SKY_ID = 1
@@ -67,16 +66,15 @@ def get_professional():
     url = 'http://www4.nhk.or.jp/professional/'
     driver = create_chrome_driver()
     driver.get(url)
-    driver.implicitly_wait(10)
     html = driver.page_source.encode('utf-8')
     soup = BeautifulSoup(html, "html.parser")
 
     block = soup.find(id="ProgramContents")
     title = soup.title.text
 
-    wait = WebDriverWait(driver, 10)
-    date_str = wait.until(
-        expected_conditions.visibility_of_element_located(block.find("time")))
+    time.sleep(10)
+
+    date_str = block.find("time")
     date_list = date_str['datetime'].split('-')
     date = datetime.date(
         int(date_list[0]), int(date_list[1]), int(date_list[2]))
