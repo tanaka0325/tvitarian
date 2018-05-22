@@ -169,7 +169,3 @@ def notify_to_line(program):
     payload = {"message": message}
 
     r = requests.post(url, headers=headers, data=payload)
-
-
-if __name__ == '__main__':
-    main()
