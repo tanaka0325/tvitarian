@@ -7,6 +7,8 @@ import redis
 import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome, ChromeOptions
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions
 
 # constants
 ANOTHER_SKY_ID = 1
@@ -72,7 +74,9 @@ def get_professional():
     block = soup.find(id="ProgramContents")
     title = soup.title.text
 
-    date_str = block.find("time")
+    wait = WebDriverWait(driver, 10)
+    date_str = wait.until(
+        expected_conditions.visibility_of_element_located(block.find("time")))
     date_list = date_str['datetime'].split('-')
     date = datetime.date(
         int(date_list[0]), int(date_list[1]), int(date_list[2]))
