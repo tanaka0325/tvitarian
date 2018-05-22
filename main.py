@@ -13,7 +13,7 @@ from selenium.webdriver import Chrome, ChromeOptions
 # constants
 ANOTHER_SKY_ID = 1
 JOHNETSU_ID = 2
-PROFESSIONAL = 3
+PROFESSIONAL_ID = 3
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 REDIS_DBNO = 0
@@ -98,7 +98,7 @@ def get_professional(driver):
     name_str = description_block.find(class_="appear").get_text()
     name = re.search("】(.+),【", name_str).group(1)
 
-    return (PROFESSIONAL, title, date, name, description)
+    return (PROFESSIONAL_ID, title, date, name, description)
 
 
 def create_soup(url):
