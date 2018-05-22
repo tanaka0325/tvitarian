@@ -113,10 +113,7 @@ def get_redis_info():
 
 
 def connect_redis():
-    redis_info = get_redis_info()
-    pool = redis.ConnectionPool(
-        host=redis_info.host, port=redis_info.port, db=redis_info.db_no)
-    return redis.StrictRedis(connection_pool=pool)
+    return redis.from_url(os.environ.get("REDIS_URL"))
 
 
 def isUpdated(program, conn):
@@ -171,4 +168,5 @@ def notify_to_line(program):
     r = requests.post(url, headers=headers, data=payload)
 
 
-main()
+if __name__ == '__main__':
+    main()
