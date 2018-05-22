@@ -65,6 +65,7 @@ def get_professional():
     url = 'http://www4.nhk.or.jp/professional/'
     driver = create_chrome_driver()
     driver.get(url)
+    driver.implicitly_wait(10)
     html = driver.page_source.encode('utf-8')
     soup = BeautifulSoup(html, "html.parser")
 
