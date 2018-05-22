@@ -3,8 +3,6 @@ import os
 import re
 import textwrap
 from collections import namedtuple
-from urllib.parse import urlparse
-
 import redis
 import requests
 from bs4 import BeautifulSoup
@@ -14,29 +12,18 @@ from selenium.webdriver import Chrome, ChromeOptions
 ANOTHER_SKY_ID = 1
 JOHNETSU_ID = 2
 PROFESSIONAL_ID = 3
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-REDIS_DBNO = 0
 
 # namedtuples
 Program = namedtuple('Program', 'id title date name description')
-RedisInfo = namedtuple('RedisInfo', 'host port db_no')
 
 
 def main():
-    options = ChromeOptions()
-    options.binary_location = '/app/.apt/usr/bin/google-chrome'
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    driver = Chrome(options=options)
-    anothersky = Program._make(get_anothersky())
-    johnetsu = Program._make(get_johnetsu())
-    professional = Program._make(get_professional(driver))
+    programs = Program._make(get_anothersky()), Program._make(
+        get_johnetsu()), Program._make(get_professional())
 
     conn = connect_redis()
-    notify(anothersky, conn)
-    notify(johnetsu, conn)
-    notify(professional, conn)
+    for program in programs:
+        notify(program, conn)
 
 
 def get_anothersky():
@@ -74,8 +61,9 @@ def get_johnetsu():
     return (JOHNETSU_ID, title, date, name, description)
 
 
-def get_professional(driver):
+def get_professional():
     url = 'http://www4.nhk.or.jp/professional/'
+    driver = create_chrome_driver()
     driver.get(url)
     html = driver.page_source.encode('utf-8')
     soup = BeautifulSoup(html, "html.parser")
@@ -97,19 +85,18 @@ def get_professional(driver):
     return (PROFESSIONAL_ID, title, date, name, description)
 
 
+def create_chrome_driver():
+    options = ChromeOptions()
+    options.binary_location = '/app/.apt/usr/bin/google-chrome'
+    options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    return Chrome(options=options)
+
+
 def create_soup(url):
     r = requests.get(url)
     r.encoding = r.apparent_encoding
     return BeautifulSoup(r.text, "html.parser")
-
-
-def get_redis_info():
-    redis_url = urlparse(os.environ.get("REDIS_URL"))
-    host = redis_url.hostname or REDIS_HOST
-    port = redis_url.port or REDIS_PORT
-    db_no = REDIS_DBNO or REDIS_DBNO
-
-    return RedisInfo(host=host, port=port, db_no=db_no)
 
 
 def connect_redis():
