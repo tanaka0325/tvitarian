@@ -21,7 +21,8 @@ Program = namedtuple('Program', 'id title date name description')
 
 def main():
     programs = Program._make(get_anothersky()), Program._make(
-        get_johnetsu()), Program._make(get_seven_rule())
+        get_johnetsu()), Program._make(get_professional()), Program._make(
+            get_seven_rule())
 
     conn = connect_redis()
     for program in programs:
@@ -69,6 +70,8 @@ def get_professional():
     driver.get(url)
     html = driver.page_source.encode('utf-8')
     soup = BeautifulSoup(html, "html.parser")
+
+    time.sleep(10)
 
     block = soup.find(id="ProgramContents")
     title = soup.title.text
