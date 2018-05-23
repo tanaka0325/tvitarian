@@ -74,7 +74,7 @@ def get_professional():
     block = soup.find(id="ProgramContents")
     title = soup.title.text
 
-    time.sleep(10)
+    time.sleep(20)
 
     date_str = block.find("time")
     date_list = date_str['datetime'].split('-')
