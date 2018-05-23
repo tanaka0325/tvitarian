@@ -21,8 +21,8 @@ Program = namedtuple('Program', 'id title date name description')
 
 def main():
     programs = Program._make(get_anothersky()), Program._make(
-        get_johnetsu()), Program._make(get_professional()), Program._make(
-            get_seven_rule())
+        get_johnetsu()), Program._make(get_seven_rule())#, Program._make(
+            get_professional())
 
     conn = connect_redis()
     for program in programs:
