@@ -21,7 +21,8 @@ Program = namedtuple('Program', 'id title date name description')
 
 def main():
     programs = Program._make(get_anothersky()), Program._make(
-        get_johnetsu()), Program._make(get_professional())
+        get_johnetsu()), Program._make(get_professional()), Program._make(
+            get_seven_rule())
 
     conn = connect_redis()
     for program in programs:
@@ -149,8 +150,8 @@ def update_notify_date(program, conn):
 
 def notify(program, conn):
     if isUpdated(program, conn):
-        notify_to_line(program)
         print(program)
+        notify_to_line(program)
         update_notify_date(program, conn)
     else:
         print('no update')
