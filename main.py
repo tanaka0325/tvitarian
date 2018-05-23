@@ -13,6 +13,7 @@ from selenium.webdriver import Chrome, ChromeOptions
 ANOTHER_SKY_ID = 1
 JOHNETSU_ID = 2
 PROFESSIONAL_ID = 3
+SEVEN_RULE_ID = 4
 
 # namedtuples
 Program = namedtuple('Program', 'id title date name description')
@@ -86,6 +87,27 @@ def get_professional():
     name = re.search("】(.+),【", name_str).group(1)
 
     return (PROFESSIONAL_ID, title, date, name, description)
+
+
+def get_seven_rule():
+    index_url = 'https://www.ktv.jp/7rules/'
+    index_soup = create_soup(index_url)
+    next_onair_page_url = index_soup.find(
+        'section', class_='conts-box program').h1.a['href']
+
+    soup = create_soup(index_url + next_onair_page_url)
+    block = soup.find('div', class_='parsys contents_parsys')
+    title = index_soup.title.text
+    date = datetime.date(
+        int('20' + next_onair_page_url[8:10]), int(next_onair_page_url[10:12]),
+        int(next_onair_page_url[12:14]))
+    job = block.find('h3').text
+    name = block.find('span', class_='name').text
+    profile = block.find('span', class_='profile').text
+    description = block.find_all('p')[-1].text
+
+    return (SEVEN_RULE_ID, title, date, f"{name}({job}): {profile}",
+            description)
 
 
 def create_chrome_driver():
