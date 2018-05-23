@@ -21,8 +21,7 @@ Program = namedtuple('Program', 'id title date name description')
 
 def main():
     programs = Program._make(get_anothersky()), Program._make(
-        get_johnetsu()), Program._make(get_professional()), Program._make(
-            get_seven_rule())
+        get_johnetsu()), Program._make(get_seven_rule())
 
     conn = connect_redis()
     for program in programs:
@@ -73,8 +72,6 @@ def get_professional():
 
     block = soup.find(id="ProgramContents")
     title = soup.title.text
-
-    time.sleep(20)
 
     date_str = block.find("time")
     date_list = date_str['datetime'].split('-')
