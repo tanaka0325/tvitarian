@@ -8,6 +8,9 @@ import redis
 import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome, ChromeOptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # constants
 ANOTHER_SKY_ID = 1
@@ -21,7 +24,7 @@ Program = namedtuple('Program', 'id title date name description')
 
 def main():
     programs = Program._make(get_anothersky()), Program._make(
-        get_johnetsu()), Program._make(get_seven_rule())#, Program._make(
+        get_johnetsu()), Program._make(get_seven_rule()), Program._make(
             get_professional())
 
     conn = connect_redis()
@@ -68,24 +71,27 @@ def get_professional():
     url = 'http://www4.nhk.or.jp/professional/'
     driver = create_chrome_driver()
     driver.get(url)
-    html = driver.page_source.encode('utf-8')
-    soup = BeautifulSoup(html, "html.parser")
+    wait = WebDriverWait(driver, 10)
 
-    time.sleep(10)
+    title = driver.title
 
-    block = soup.find(id="ProgramContents")
-    title = soup.title.text
+    date_element = wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH, "/html/body//*[@id='ProgramContents']//time")))
+    date = date_element.get_attribute('datetime')
 
-    date_str = block.find("time")
-    date_list = date_str['datetime'].split('-')
-    date = datetime.date(
-        int(date_list[0]), int(date_list[1]), int(date_list[2]))
+    name_element = wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH,
+             "/html/body//*[@id='ProgramContents']//p[@class='appear']")))
+    name = re.search("】(.+),【", name_element.text).group(1)
 
-    description_block = block.find(class_="program-description")
-    description = description_block.p.get_text()
-
-    name_str = description_block.find(class_="appear").get_text()
-    name = re.search("】(.+),【", name_str).group(1)
+    desc_element = wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH,
+             "/html/body//*[@class='program-description col-4']/p[1]")))
+    description = desc_element.text
+    print(description)
 
     return (PROFESSIONAL_ID, title, date, name, description)
 
