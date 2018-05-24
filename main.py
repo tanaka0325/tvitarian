@@ -24,8 +24,8 @@ Program = namedtuple('Program', 'id title date name description')
 
 def main():
     programs = Program._make(get_anothersky()), Program._make(
-        get_johnetsu()), Program._make(get_seven_rule()), Program._make(
-            get_professional())
+        get_johnetsu()), Program._make(get_professional()), Program._make(
+            get_seven_rule())
 
     conn = connect_redis()
     for program in programs:
@@ -78,7 +78,8 @@ def get_professional():
     date_element = wait.until(
         EC.presence_of_element_located(
             (By.XPATH, "/html/body//*[@id='ProgramContents']//time")))
-    date = date_element.get_attribute('datetime')
+    l = date_element.get_attribute('datetime').split('-')
+    date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
 
     name_element = wait.until(
         EC.presence_of_element_located(
@@ -91,7 +92,6 @@ def get_professional():
             (By.XPATH,
              "/html/body//*[@class='program-description col-4']/p[1]")))
     description = desc_element.text
-    print(description)
 
     return (PROFESSIONAL_ID, title, date, name, description)
 
