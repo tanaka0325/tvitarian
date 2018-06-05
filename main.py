@@ -17,6 +17,7 @@ ANOTHER_SKY_ID = 1
 JOHNETSU_ID = 2
 PROFESSIONAL_ID = 3
 SEVEN_RULE_ID = 4
+MUSIC_STATION_ID = 5
 
 # namedtuples
 Program = namedtuple('Program', 'id title date name description')
@@ -25,7 +26,7 @@ Program = namedtuple('Program', 'id title date name description')
 def main():
     programs = Program._make(get_anothersky()), Program._make(
         get_johnetsu()), Program._make(get_professional()), Program._make(
-            get_seven_rule())
+            get_seven_rule()), Program._make(get_music_station())
 
     conn = connect_redis()
     for program in programs:
@@ -115,6 +116,31 @@ def get_seven_rule():
 
     return (SEVEN_RULE_ID, title, date, f"{name}({job}): {profile}",
             description)
+
+
+def get_music_station():
+    url = 'http://www.tv-asahi.co.jp/music'
+    driver = create_chrome_driver()
+    driver.get(url)
+    wait = WebDriverWait(driver, 10)
+
+    title = driver.title
+
+    date_element = wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH, "/html/body//*[@id='title_date_lineup']")))
+    l = date_element.text.split(".FRI")[0].split('.')
+    date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
+
+    name_element = wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH,
+             "/html/body//*[@id='artists_info_lineup']")))
+    elements = name_element.find_elements_by_xpath(".//li")
+    artists_and_songs = list(map(lambda e: e.text.replace("\n", "(") + ")", elements))
+    name = ", ".join(artists_and_songs)
+
+    return (MUSIC_STATION_ID, title, date, name, "なし")
 
 
 def create_chrome_driver():
