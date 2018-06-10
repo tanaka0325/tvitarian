@@ -1,22 +1,28 @@
 import datetime
 
-from .shared.beautiful_soup import create_soup
+from .html_crawler import HtmlCrawler
 from .shared.const import ANOTHER_SKY_ID
 
 
-class Anothersky:
-    url = 'http://www.ntv.co.jp/anothersky/'
+class Anothersky(HtmlCrawler):
+    def url(self):
+        return 'http://www.ntv.co.jp/anothersky/'
 
-    def crawl(self):
-        soup = create_soup(self.url)
+    def id(self):
+        return ANOTHER_SKY_ID
 
-        block = soup.find(id="nextGuest").p.text
-        title = soup.title.text
+    def title(self):
+        return self.soup.title.text
 
-        date_str = block.splitlines()[0][5:].split('.')
-        date = datetime.date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
+    def date(self):
+        date_str = self.block().splitlines()[0][5:].split('.')
+        return datetime.date(int(date_str[0]), int(date_str[1]), int(date_str[2]))
 
-        name = block.splitlines()[2]
-        description = "".join(block.splitlines())
+    def name(self):
+        return self.block().splitlines()[2]
 
-        return (ANOTHER_SKY_ID, title, date, name, description)
+    def description(self):
+        return "".join(self.block().splitlines())
+
+    def block(self):
+        return self.soup.find(id="nextGuest").p.text

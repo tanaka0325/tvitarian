@@ -1,27 +1,25 @@
-from .shared.beautiful_soup import create_soup
-
 class Crawler:
     def crawl(self):
-        page = self.prepare()
-        return self.id(), self.title(page), self.date(page), self.name(page), self.description(page)
+        self.prepare()
+        return self.id(), self.title(), self.date(), self.name(), self.description()
 
     def prepare(self):
-        return create_soup(self.url)
+        pass
 
     def url(self):
         pass
-    
+
     def id(self):
         pass
 
-    def title(self, page):
+    def title(self):
         pass
 
-    def date(self, page):
+    def date(self):
         pass
 
-    def name(self, page):
+    def name(self):
         pass
 
-    def description(self, page):
+    def description(self):
         pass
