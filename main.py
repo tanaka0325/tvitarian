@@ -89,7 +89,7 @@ def get_professional():
         date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
     except:
         errors.append("err:professional:date")
-        date = dastetime.date(1970, 1, 1)
+        date = datetime.date(1970, 1, 1)
 
     try:
         name_element = wait.until(
@@ -151,7 +151,7 @@ def get_music_station():
         date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
     except:
         errors.append("err:music_station:date")
-        date = dastetime.date(1970, 1, 1)
+        date = datetime.date(1970, 1, 1)
 
     try:
         name_element = wait.until(
