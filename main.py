@@ -22,6 +22,8 @@ MUSIC_STATION_ID = 5
 # namedtuples
 Program = namedtuple('Program', 'id title date name description')
 
+errors = []
+
 
 def main():
     programs = Program._make(get_anothersky()), Program._make(
@@ -31,6 +33,9 @@ def main():
     conn = connect_redis()
     for program in programs:
         notify(program, conn)
+
+    if errors:
+        print(errors)
 
 
 def get_anothersky():
@@ -76,23 +81,35 @@ def get_professional():
 
     title = driver.title
 
-    date_element = wait.until(
-        EC.presence_of_element_located(
-            (By.XPATH, "/html/body//*[@id='ProgramContents']//time")))
-    l = date_element.get_attribute('datetime').split('-')
-    date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
+    try:
+        date_element = wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH, "/html/body//*[@id='ProgramContents']//time")))
+        l = date_element.get_attribute('datetime').split('-')
+        date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
+    except:
+        errors.append("err:professional:date")
+        date = dastetime.date(1970, 1, 1)
 
-    name_element = wait.until(
-        EC.presence_of_element_located(
-            (By.XPATH,
-             "/html/body//*[@id='ProgramContents']//p[@class='appear']")))
-    name = re.search("】(.+),【", name_element.text).group(1)
+    try:
+        name_element = wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH,
+                 "/html/body//*[@id='ProgramContents']//p[@class='appear']")))
+        name = re.search("】(.+),【", name_element.text).group(1)
+    except:
+        errors.append("err:professional:name")
+        name = "error name"
 
-    desc_element = wait.until(
-        EC.presence_of_element_located(
-            (By.XPATH,
-             "/html/body//*[@class='program-description col-4']/p[1]")))
-    description = desc_element.text
+    try:
+        desc_element = wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH,
+                 "/html/body//*[@class='program-description col-4']/p[1]")))
+        description = desc_element.text
+    except:
+        errors.append("err:professional:description")
+        description = "error description"
 
     return (PROFESSIONAL_ID, title, date, name, description)
 
@@ -126,19 +143,27 @@ def get_music_station():
 
     title = driver.title
 
-    date_element = wait.until(
-        EC.presence_of_element_located(
-            (By.XPATH, "/html/body//*[@id='title_date_lineup']")))
-    l = date_element.text.split(".FRI")[0].split('.')
-    date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
+    try:
+        date_element = wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH, "/html/body//*[@id='title_date_lineup']")))
+        l = date_element.text.split(".FRI")[0].split('.')
+        date = datetime.date(int(l[0]), int(l[1]), int(l[2]))
+    except:
+        errors.append("err:music_station:date")
+        date = dastetime.date(1970, 1, 1)
 
-    name_element = wait.until(
-        EC.presence_of_element_located(
-            (By.XPATH,
-             "/html/body//*[@id='artists_info_lineup']")))
-    elements = name_element.find_elements_by_xpath(".//li")
-    artists_and_songs = list(map(lambda e: e.text.replace("\n", "(") + ")", elements))
-    name = ", ".join(artists_and_songs)
+    try:
+        name_element = wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH, "/html/body//*[@id='artists_info_lineup']")))
+        elements = name_element.find_elements_by_xpath(".//li")
+        artists_and_songs = list(
+            map(lambda e: e.text.replace("\n", "(") + ")", elements))
+        name = ", ".join(artists_and_songs)
+    except:
+        errors.append("err:music_station:name")
+        name = "error name"
 
     return (MUSIC_STATION_ID, title, date, name, "なし")
 
