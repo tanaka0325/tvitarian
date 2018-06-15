@@ -158,6 +158,8 @@ def get_music_station():
             EC.presence_of_element_located(
                 (By.XPATH, "/html/body//*[@id='artists_info_lineup']")))
         elements = name_element.find_elements_by_xpath(".//li")
+        if len(elements) <= 0:
+            raise ValueError('no lineup')
         artists_and_songs = list(
             map(lambda e: e.text.replace("\n", "(") + ")", elements))
         name = ", ".join(artists_and_songs)
